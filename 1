@@ -1,0 +1,52 @@
+  ь<div id="app">
+  <h1>Межвузовская олимпиада</h1>
+
+  <!-- Регистрация и Вход -->
+  <div id="auth">
+    <div id="register-form">
+      <h2>Регистрация</h2>
+      <input type="text" id="reg-firstname" placeholder="Имя"><br>
+      <input type="text" id="reg-fathername" placeholder="Отчество"><br>
+      <input type="text" id="reg-lastname" placeholder="Фамилия"><br>
+      <input type="text" id="reg-username" placeholder="Логин"><br>
+      <input type="password" id="reg-password" placeholder="Пароль"><br>
+      <button id="register-btn">Зарегистрироваться</button>
+      <p id="register-msg"></p>
+    </div>
+
+    <div id="login-form">
+      <h2>Вход</h2>
+      <input type="text" id="login-username" placeholder="Логин"><br>
+      <input type="password" id="login-password" placeholder="Пароль"><br>
+      <button id="login-btn">Войти</button>
+      <button id="forgot-btn">Забыли пароль?</button>
+      <p id="login-msg"></p>
+    </div>
+  </div>
+
+  <!-- Уровни -->
+  <div id="levels-page" style="display:none;">
+    <h2>Выберите уровень</h2>
+    <button id="level1-btn">Уровень 1 (5 задач)</button>
+    <button id="level2-btn">Уровень 2 (10 тестов)</button>
+  </div>
+
+  <!-- Первый уровень -->
+  <div id="level1-page" style="display:none;">
+    <h2>Первый уровень</h2>
+    <div id="task-container"></div>
+  </div>
+
+  <!-- Второй уровень -->
+  <div id="level2-page" style="display:none;">
+    <h2>Второй уровень</h2>
+    <div id="level2-tasks"></div>
+  </div>
+
+  <!-- Результаты -->
+  <div id="results-page" style="display:none;">
+    <h2>Результаты олимпиады</h2>
+    <p id="final-score"></p>
+    <p id="final-medal"></p>
+  </div>
+</div>
