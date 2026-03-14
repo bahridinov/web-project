@@ -1,0 +1,180 @@
+window.onload = function() {
+  let level1Data = [
+    {q:"2+2", a:"4"},
+    {q:"7+3", a:"10"},
+    {q:"10+5", a:"15"},
+    {q:"5-5", a:"0"},
+    {q:"10+10", a:"20"}
+  ];
+
+  let level2Data = [
+    {q:"Сколько дней в неделе?", options:["5","6","7","8"], a:"7"},
+    {q:"Сколько часов в сутках?", options:["12","24","36","48"], a:"24"},
+    {q:"2+3=?", options:["4","5","6","7"], a:"5"},
+    {q:"5*2=?", options:["7","10","12","15"], a:"10"},
+    {q:"10-7=?", options:["1","2","3","4"], a:"3"},
+    {q:"Сколько месяцев в году?", options:["10","11","12","13"], a:"12"},
+    {q:"10/2=?", options:["2","4","5","6"], a:"5"},
+    {q:"3*3=?", options:["6","8","9","12"], a:"9"},
+    {q:"7-3=?", options:["2","3","4","5"], a:"4"},
+    {q:"Сколько секунд в минуте?", options:["30","60","90","120"], a:"60"}
+  ];
+
+  let currentTaskIndex=0;
+  let currentLevel2Index=0;
+
+  // Регистрация
+  document.getElementById("register-btn").onclick = () => {
+    const firstname = document.getElementById("reg-firstname").value.trim();
+    const fathername = document.getElementById("reg-fathername").value.trim();
+    const lastname = document.getElementById("reg-lastname").value.trim();
+    const username = document.getElementById("reg-username").value.trim();
+    const password = document.getElementById("reg-password").value.trim();
+    if(!firstname || !fathername || !lastname || !username || !password){
+      document.getElementById("register-msg").innerText = "Заполните все поля!";
+      return;
+    }
+    let users = JSON.parse(localStorage.getItem("users")||"[]");
+    if(users.find(u=>u.username===username)){
+      document.getElementById("register-msg").innerText = "Пользователь уже существует!";
+      return;
+    }
+    users.push({firstname,fathername,lastname,username,password,level1Score:0,level2Score:0});
+    localStorage.setItem("users",JSON.stringify(users));
+    document.getElementById("register-msg").innerText="Регистрация успешна!";
+  }
+
+  // Вход
+  document.getElementById("login-btn").onclick = ()=>{
+    const username = document.getElementById("login-username").value.trim();
+    const password = document.getElementById("login-password").value.trim();
+    let users = JSON.parse(localStorage.getItem("users")||"[]");
+    let user = users.find(u=>u.username===username && u.password===password);
+    if(user){
+      localStorage.setItem("currentUser",username);
+      document.getElementById("login-msg").innerText="Вход успешен!";
+      document.getElementById("auth").style.display="none";
+      document.getElementById("levels-page").style.display="block";
+    } else {
+      document.getElementById("login-msg").innerText="Неверный логин или пароль!";
+    }
+  }
+
+  document.getElementById("forgot-btn").onclick = ()=>{
+    const username = prompt("Введите логин:");
+    let users = JSON.parse(localStorage.getItem("users")||"[]");
+    let user = users.find(u=>u.username===username);
+    if(user) alert(`Ваш пароль: ${user.password}`);
+    else alert("Пользователь не найден!");
+  }
+
+  // Выбор уровня
+  document.getElementById("level1-btn").onclick = ()=>{
+    document.getElementById("levels-page").style.display="none";
+    document.getElementById("level1-page").style.display="block";
+    currentTaskIndex=0;
+    showLevel1Task();
+  }
+
+  document.getElementById("level2-btn").onclick = ()=>{
+    document.getElementById("levels-page").style.display="none";
+    document.getElementById("level2-page").style.display="block";
+    currentLevel2Index=0;
+    showLevel2Task();
+  }
+
+  // Первый уровень
+  function showLevel1Task(){
+    const container = document.getElementById("task-container");
+    container.innerHTML="";
+    if(currentTaskIndex>=level1Data.length){
+      document.getElementById("level1-page").style.display="none";
+      document.getElementById("level2-page").style.display="block";
+      currentLevel2Index=0;
+      showLevel2Task();
+      return;
+    }
+    let t = level1Data[currentTaskIndex];
+    let div = document.createElement("div");
+    div.className="task";
+    div.innerHTML=`<h3>Задача ${currentTaskIndex+1}: ${t.q}</h3>
+      <textarea class="solution" rows="2" cols="30"></textarea><br>
+      <button id="check-btn">Проверить</button>
+      <p class="status"></p>`;
+    container.appendChild(div);
+
+    document.getElementById("check-btn").onclick = ()=>{
+      const userAnswer = div.querySelector(".solution").value.trim();
+      const username = localStorage.getItem("currentUser");
+      let users = JSON.parse(localStorage.getItem("users")||"[]");
+      let user = users.find(u=>u.username===username);
+      if(userAnswer===t.a){
+        div.querySelector(".status").innerText="Accepted";
+        user.level1Score+=6;
+        localStorage.setItem("users",JSON.stringify(users));
+        new Audio("https://www.soundjay.com/buttons/beep-07.mp3").play();
+      } else {
+        div.querySelector(".status").innerText="Wrong Answer";
+      }
+      currentTaskIndex++;
+      setTimeout(showLevel1Task,500);
+    }
+  }
+
+  // Второй уровень
+  function showLevel2Task(){
+    const container = document.getElementById("level2-tasks");
+    container.innerHTML="";
+    if(currentLevel2Index>=level2Data.length){
+      finishLevel();
+      return;
+    }
+    let t = level2Data[currentLevel2Index];
+    let div = document.createElement("div");
+    div.className="task2";
+    div.innerHTML=`<h3>Задача ${currentLevel2Index+1}: ${t.q}</h3>
+      ${t.options.map(o=>`<label><input type="radio" name="opt" value="${o}"> ${o}</label><br>`).join("")}
+      <button id="check2-btn">Проверить</button>
+      <p class="status2"></p>`;
+    container.appendChild(div);
+
+    document.getElementById("check2-btn").onclick = ()=>{
+      const selected = div.querySelector('input[name="opt"]:checked');
+      const username = localStorage.getItem("currentUser");
+      let users = JSON.parse(localStorage.getItem("users")||"[]");
+      let user = users.find(u=>u.username===username);
+      if(selected && selected.value===t.a){
+        div.querySelector(".status2").innerText="Accepted";
+        user.level2Score+=7;
+        localStorage.setItem("users",JSON.stringify(users));
+        new Audio("https://www.soundjay.com/buttons/beep-07.mp3").play();
+      } else {
+        div.querySelector(".status2").innerText="Wrong Answer";
+      }
+      currentLevel2Index++;
+      setTimeout(showLevel2Task,500);
+    }
+  }
+
+  function finishLevel(){
+    document.getElementById("level1-page").style.display="none";
+    document.getElementById("level2-page").style.display="none";
+    document.getElementById("results-page").style.display="block";
+
+    const username = localStorage.getItem("currentUser");
+    let users = JSON.parse(localStorage.getItem("users")||"[]");
+    let user = users.find(u=>u.username===username);
+
+    const totalScore = (user.level1Score||0) + (user.level2Score||0);
+    document.getElementById("final-score").innerText=`Вы набрали ${totalScore} баллов (1 уровень: ${user.level1Score}, 2 уровень: ${user.level2Score}).`;
+
+    let medal="";
+    if(totalScore>=80) medal="🥇 1-е место";
+    else if(totalScore>=60) medal="🥈 2-е место";
+    else if(totalScore>=40) medal="🥉 3-е место";
+    else medal="Нет медали";
+    document.getElementById("final-medal").innerText=`${medal}`;
+
+    new Audio("https://www.soundjay.com/buttons/button-3.mp3").play();
+  }
+}
